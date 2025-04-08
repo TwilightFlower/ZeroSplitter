@@ -232,9 +232,9 @@ impl App for ZeroSplitter {
 					if ui.small_button("+").clicked() {
 						self.waiting_for_category = true;
 					}
-					if ui.button("Delete").clicked() {
+					/*if ui.button("Delete").clicked() {
 						self.waiting_for_confirm = true;
-					}
+					}*/
 					if ui.button("Rename").clicked() {
 						self.waiting_for_rename = true;
 					}
@@ -331,6 +331,7 @@ impl App for ZeroSplitter {
 					self.categories.remove(self.current_category);
 					self.current_category = self.current_category.saturating_sub(1);
 				}
+				self.waiting_for_confirm = false;
 			} else {
 				confirm_dialog(
 					ctx,
