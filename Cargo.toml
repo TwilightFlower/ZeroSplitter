@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = [ "payload", "splitter", "common" ]
+
+[profile.release]
+lto = "thin"
+strip = "symbols"
