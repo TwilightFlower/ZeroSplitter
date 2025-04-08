@@ -2,7 +2,7 @@ use std::{
 	ffi::{OsString, c_void},
 	os::windows::ffi::OsStringExt,
 	path::PathBuf,
-	ptr,
+	ptr, u32,
 };
 
 use windows::{
@@ -20,27 +20,20 @@ use windows::{
 };
 
 pub fn list_processes() -> Result<Vec<u32>, Error> {
-	let mut buf_size: u32 = 0;
-	unsafe { EnumProcesses(ptr::null_mut(), 0, &mut buf_size) }?;
+	let mut buf_entries = 32;
+	let mut read_bytes: u32 = u32::MAX;
+	let mut buf = Vec::new();
 
-	// bytes -> entries
-	buf_size /= 4;
-
-	// Add space for 10 extra, since more might get spawned
-	buf_size += 10;
-
-	let mut pids = vec![0; buf_size as usize];
-	unsafe { EnumProcesses(pids.as_mut_ptr(), buf_size * 4, &mut buf_size) }?;
-
-	// Remove any excess 0s
-	let extra_space = pids.len() as i32 - (buf_size / 4) as i32;
-	if extra_space > 0 {
-		for _ in 0..extra_space {
-			pids.pop();
+	while read_bytes >= buf_entries * 4 {
+		buf_entries *= 2;
+		buf = vec![0; buf_entries as usize];
+		unsafe {
+			EnumProcesses(buf.as_mut_ptr(), buf_entries * 4, &mut read_bytes)?;
 		}
 	}
 
-	Ok(pids)
+	buf.truncate(read_bytes as usize / 4);
+	Ok(buf)
 }
 
 pub fn open_process(pid: u32, access: PROCESS_ACCESS_RIGHTS) -> Result<ProcessHandle, Error> {
@@ -106,7 +99,6 @@ impl ProcessHandle {
 				Some(&mut tid),
 			)
 		};
-		println!("{}", tid);
 		res
 	}
 

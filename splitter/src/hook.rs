@@ -9,7 +9,6 @@ use std::{
 
 use crate::system::{self, ProcessHandle};
 use bytemuck::cast_slice;
-use log::info;
 use windows::{
 	Win32::System::{
 		LibraryLoader::{GetModuleHandleA, GetProcAddress},
@@ -42,22 +41,22 @@ pub fn hook_zeroranger() {
 fn find_zeroranger() -> Option<ProcessHandle> {
 	println!("Searching for process to hook...");
 	for pid in system::list_processes().unwrap() {
-		let handle = system::open_process(pid, PROCESS_QUERY_LIMITED_INFORMATION).unwrap();
-		let exe = handle.get_executable();
-		if exe.file_name() == Some(OsStr::new(&"ZeroRanger.exe")) {
-			// we need a more privileged access to ZR
-			let privileged_handle = system::open_process(
-				pid,
-				PROCESS_VM_OPERATION
-					| PROCESS_VM_READ
-					| PROCESS_VM_WRITE
-					| PROCESS_CREATE_THREAD
-					| PROCESS_QUERY_INFORMATION,
-			)
-			.expect("Acquiring privileged handle");
-			info!("Found ZeroRanger with PID {}", pid);
+		if let Ok(handle) = system::open_process(pid, PROCESS_QUERY_LIMITED_INFORMATION) {
+			let exe = handle.get_executable();
+			if exe.file_name() == Some(OsStr::new(&"ZeroRanger.exe")) {
+				// we need a more privileged access to ZR
+				let privileged_handle = system::open_process(
+					pid,
+					PROCESS_VM_OPERATION
+						| PROCESS_VM_READ | PROCESS_VM_WRITE
+						| PROCESS_CREATE_THREAD
+						| PROCESS_QUERY_INFORMATION,
+				)
+				.expect("Acquiring privileged handle");
+				println!("Found ZeroRanger with PID {}", pid);
 
-			return Some(privileged_handle);
+				return Some(privileged_handle);
+			}
 		}
 	}
 

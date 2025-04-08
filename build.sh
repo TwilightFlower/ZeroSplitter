@@ -2,4 +2,6 @@
 
 set -e
 cargo build --release
-zip target/i686-pc-windows-msvc/release/zerosplitter.zip target/i686-pc-windows-msvc/release/zerosplitter.exe target/i686-pc-windows-msvc/release/payload.dll
+cd target/i686-pc-windows-msvc/release
+rm zerosplitter.zip
+zip zerosplitter.zip zerosplitter.exe payload.dll
