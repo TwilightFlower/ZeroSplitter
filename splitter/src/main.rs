@@ -177,7 +177,7 @@ impl ZeroSplitter {
 			}
 
 			if !frame.is_menu() {
-				let frame_split = (frame.stage - 1 + frame.game_loop * 4) as usize;
+				let frame_split = (frame.stage - 1 - frame.game_loop) as usize;
 
 				// Split if necessary
 				if frame.stage != self.last_frame.stage {
