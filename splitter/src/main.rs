@@ -179,6 +179,11 @@ impl ZeroSplitter {
 			if !frame.is_menu() {
 				let frame_split = (frame.stage - 1 - frame.game_loop) as usize;
 
+				if frame_split >= 8 {
+					// TLB or credits
+					return;
+				}
+
 				// Split if necessary
 				if frame.stage != self.last_frame.stage {
 					self.current_split = Some(frame_split);
